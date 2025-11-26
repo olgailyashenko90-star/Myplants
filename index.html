@@ -1,51 +1,22 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>MyPlants — мои растения</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f3f7f0;
-      margin: 0;
-      padding: 0;
-      color: #2d4739;
-    }
-    header {
-      background: #6da66d;
-      color: white;
-      padding: 20px;
-      text-align: center;
-      font-size: 26px;
-    }
-    main {
-      padding: 20px;
-      max-width: 600px;
-      margin: auto;
-    }
-    h2 {
-      margin-top: 30px;
-      border-bottom: 2px solid #6da66d;
-      padding-bottom: 5px;
-    }
-    .plant {
-      background: white;
-      padding: 15px;
-      margin-top: 10px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.08);
-    }
-    .plant h3 {
-      margin: 0;
-    }
-    footer {
-      text-align: center;
-      margin-top: 40px;
-      padding: 15px;
-      background: #e4f2e1;
-      font-size: 14px;
-    }
+    body { font-family: Arial, sans-serif; background:#f3f7f0; margin:0; padding:0; }
+    header { background:#6da66d; color:white; padding:20px; text-align:center; font-size:26px; }
+    main { padding:20px; max-width:600px; margin:auto; }
+    h2 { border-bottom:2px solid #6da66d; padding-bottom:5px; }
+    .plant { background:white; padding:15px; margin-top:10px; border-radius:10px;
+             box-shadow:0 0 10px rgba(0,0,0,0.08); }
+    button { background:#6da66d; color:white; padding:12px; border:none; border-radius:8px;
+             width:100%; font-size:18px; margin-top:15px; cursor:pointer; }
+    button:hover { opacity:0.9; }
+    #formBox { display:none; margin-top:20px; background:white; padding:15px; border-radius:10px;
+               box-shadow:0 0 10px rgba(0,0,0,0.1);}
+    input { width:100%; padding:10px; margin-bottom:10px; border-radius:6px; border:1px solid #ccc; }
   </style>
 </head>
 <body>
@@ -53,33 +24,56 @@
 <header>🌿 MyPlants — мои растения</header>
 
 <main>
-  <p>Добро пожаловать! Здесь я веду расписание полива и ухода за растениями.</p>
+  <p>Добро пожаловать! Добавляйте свои растения и следите за поливом.</p>
 
   <h2>Мои растения</h2>
+  <div id="plants"></div>
 
-  <div class="plant">
-    <h3>Монстера</h3>
-    <p>💧 Полив: раз в 7 дней</p>
-    <p>✂️ Протереть листья раз в 14 дней</p>
+  <button onclick="toggleForm()">Добавить растение ➕</button>
+
+  <div id="formBox">
+    <input id="name" placeholder="Название растения" />
+    <input id="water" type="number" placeholder="Полив (каждые X дней)" />
+    <button onclick="addPlant()">Сохранить 🌱</button>
   </div>
 
-  <div class="plant">
-    <h3>Сансевиерия</h3>
-    <p>💧 Полив: раз в 10 дней</p>
-    <p>☀️ Любит яркий свет</p>
-  </div>
-
-  <div class="plant">
-    <h3>Фикус</h3>
-    <p>💧 Полив: раз в 5 дней</p>
-    <p>🌿 Пересадка раз в год</p>
-  </div>
-
-  <h2>📅 Ближайший полив</h2>
-  <p>Монстера — через 3 дня</p>
+  <h2>📅 Напоминания</h2>
+  <p>Сайт уведомит вас, когда пора поливать!</p>
 </main>
 
-<footer>Сделано с любовью к растениям 💚</footer>
+<script>
+let plants = JSON.parse(localStorage.getItem('plants') || '[]');
+render();
 
+function toggleForm(){
+  document.getElementById('formBox').style.display =
+    document.getElementById('formBox').style.display === 'none' ? 'block' : 'none';
+}
+
+function addPlant(){
+  const name = document.getElementById('name').value;
+  const water = document.getElementById('water').value;
+  plants.push({ name, water, last: Date.now() });
+  localStorage.setItem('plants', JSON.stringify(plants));
+  render();
+  toggleForm();
+}
+
+function render(){
+  const box = document.getElementById('plants');
+  box.innerHTML = '';
+  plants.forEach(p => {
+    const days = Math.round((Date.now() - p.last) / 86400000);
+    const left = p.water - days;
+    box.innerHTML += `
+      <div class="plant">
+        <h3>${p.name}</h3>
+        <p>💧 Полив каждые ${p.water} дней</p>
+        <p>⏱️ До полива: ${left > 0 ? left + ' дней' : 'СЕГОДНЯ!'} 🌧️</p>
+      </div>
+    `;
+  });
+}
+</script>
 </body>
 </html>
